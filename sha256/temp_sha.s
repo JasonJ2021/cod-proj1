@@ -3,7 +3,7 @@
 	.attribute arch, "rv32i2p0_m2p0_a2p0_f2p0_d2p0_c2p0"
 	.attribute unaligned_access, 0
 	.attribute stack_align, 16
-	.text
+	.textsss
 	.section	.rodata
 	.align	2
 	.type	k, @object
@@ -130,49 +130,41 @@ sha256_transform:
 	bleu	a4,a5,.L3
 	j	.L4
 .L5:
-  # 54:sha256.c      **** 		m[i] = SIG1(m[i - 2]) + m[i - 7] + SIG0(m[i - 15]) + m[i - 16];
 	lw	a5,-52(s0)
 	addi	a5,a5,-2
 	slli	a5,a5,2
 	addi	a4,s0,-16
 	add	a5,a4,a5
 	lw	a5,-304(a5)
-	# ROTLEFT(x,13) √
-	# ROTLEFT(a,b) (((a) << (b)) | ((a) >> (32-(b))))
-	addi a3 , x0 , 13
+  # a5 = x , saved to a4 , rightleft(x,13)
+  # insn r opcode , func3 , func7 , rd , rs1,rs2
+  addi a3 , a0 , 13
 	.insn r 0x33 , 1 , 2 , a4 , a5 , a3
-	# slli	a3,a5,13
-	# srli	a4,a5,19
 	# or	a4,a4,a3
-  #
 	lw	a5,-52(s0)
 	addi	a5,a5,-2
 	slli	a5,a5,2
 	addi	a3,s0,-16
 	add	a5,a3,a5
 	lw	a5,-304(a5)
-	# ROTLEFT(x,15) √
+  # rotleft(x,15) , x = a5
 	# slli	a3,a5,15
 	# srli	a5,a5,17
 	# or	a5,a5,a3
-	addi a3 , x0 , 15
+  addi a3 , a0 , 15
   .insn r 0x33 , 1 , 2 , a5 , a5 , a3
-	# xor(ROTLEFT(x,15) , ROTLEFT(X,13))
+  # 
 	xor	a4,a4,a5
-	# 
 	lw	a5,-52(s0)
 	addi	a5,a5,-2
 	slli	a5,a5,2
 	addi	a3,s0,-16
 	add	a5,a3,a5
 	lw	a5,-304(a5)
-	# a5 = x >> 10
 	srli	a5,a5,10
-	
 	xor	a4,a4,a5
-	# end of sig1(x)
-
 	lw	a5,-52(s0)
+
 	addi	a5,a5,-7
 	slli	a5,a5,2
 	addi	a3,s0,-16
@@ -185,38 +177,33 @@ sha256_transform:
 	addi	a4,s0,-16
 	add	a5,a4,a5
 	lw	a5,-304(a5)
-	# ROTRIGHT(x,7) √
-	# srli	a2,a5,7
-	# slli	a4,a5,25
-	# or	a4,a4,a2
-	addi a2 , x0 , 7
+	# ROTRIGHT(x,7) a5 = x , saved to a4
+  addi a2 , a0 , 7
   .insn r 0x33 , 2 , 2 , a4 , a5 , a2
-	# endof rotright(x,7)
+  #
 	lw	a5,-52(s0)
 	addi	a5,a5,-15
 	slli	a5,a5,2
 	addi	a2,s0,-16
 	add	a5,a2,a5
 	lw	a5,-304(a5)
-	# # ROTRIGHT(x,18)
+  # ROTRIGHT(x,18) , x = a5 , saved to a5
 	# slli	a2,a5,14
 	# srli	a5,a5,18
 	# or	a5,a5,a2
-	addi a2 , x0 , 18
+  addi a2 , a0 , 18
   .insn r 0x33 , 2 , 2 , a5 , a5 , a2
+  #
 	xor	a4,a4,a5
-	#end of ========= rotright ^ rot^right
 	lw	a5,-52(s0)
 	addi	a5,a5,-15
 	slli	a5,a5,2
 	addi	a2,s0,-16
 	add	a5,a2,a5
 	lw	a5,-304(a5)
-	# x >> 3
 	srli	a5,a5,3
 	xor	a5,a4,a5
 	add	a4,a3,a5
-	# end of sig1 & sig0
 	lw	a5,-52(s0)
 	addi	a5,a5,-16
 	slli	a5,a5,2
@@ -232,7 +219,6 @@ sha256_transform:
 	lw	a5,-52(s0)
 	addi	a5,a5,1
 	sw	a5,-52(s0)
-	# 53:sha256.c      **** 	for ( ; i < 64; ++i)
 .L4:
 	lw	a4,-52(s0)
 	li	a5,63
@@ -263,50 +249,45 @@ sha256_transform:
 	sw	a5,-48(s0)
 	sw	zero,-52(s0)
 	j	.L6
-# 66:sha256.c      **** 		t1 = h + EP1(e) + CH(e,f,g) + k[i] + m[i];
 .L7:
 	lw	a5,-36(s0)
-	# ROTLEFT(x,7) √
+  # rotleft(x,7) , a5 = x , saved to a4  
 	# slli	a3,a5,7 
 	# srli	a4,a5,25
 	# or	a4,a4,a3
-	addi a3 , x0 , 7
+  addi a3 , a0 , 7
   .insn r 0x33 , 1 , 2 , a4 , a5 , a3
-	# endof ROTLEFT(x,7) 
 	lw	a5,-36(s0)
-	# ROTLEFT(x,21) √
+  # rotleft(x,21) , a5 = x , saved to a5
 	# srli	a3,a5,11
 	# slli	a5,a5,21
 	# or	a5,a5,a3
-	addi a3 , x0 , 21
+  addi a3 , a0 , 21
   .insn r 0x33 , 1 , 2 , a5 , a5 , a3
-	# END OF ROTLEFT(X,21)
 	xor	a4,a4,a5
 	lw	a5,-36(s0)
-	# ROTLEFT(x,26) √
+  # rotleft(x,26) , a5 = x , saved to a5
 	# srli	a3,a5,6
 	# slli	a5,a5,26
 	# or	a5,a5,a3
-	# END OF ROTLEFT(x,26)
-	addi a3 , x0 , 26
+  addi a3 , a0 , 26
   .insn r 0x33 , 1 , 2 , a5 , a5 , a3
+
 	xor	a4,a4,a5
-	# END OF EP(1)
 	lw	a5,-48(s0)
 	add	a4,a4,a5
 	lw	a3,-36(s0)
 	lw	a5,-40(s0)
-	and	a3,a3,a5 # x & y
-	# NOTAND(a,b) (~(a) & (b))
+  # a3 = x & y
+	and	a3,a3,a5
+  # NOTAND(a,b) a5 = a  can use a2 = b , saved to a5 
 	lw	a5,-36(s0)
-	# ~a
 	# not	a2,a5
 	lw	a2,-44(s0)
-	# ~(a) & b
 	# and	a5,a2,a5
-	.insn r 0x33 , 4 , 2 , a5 , a5 , a2
+  .insn r 0x33 , 4 , 2 , a5 , a5 , a2
+  #
 	xor	a5,a3,a5
-	# end of CH
 	add	a4,a4,a5
 	lui	a5,%hi(k)
 	addi	a3,a5,%lo(k)
@@ -323,33 +304,29 @@ sha256_transform:
 	add	a5,a4,a5
 	sw	a5,-60(s0)
 	lw	a5,-20(s0)
-	# ROTRIGHT(x,2) √
+  # rotright(x,2) saved to a4 , a5 = x
 	# srli	a3,a5,2
 	# slli	a4,a5,30
 	# or	a4,a4,a3
-	addi a3 , x0 , 2
+  addi a3 , a0 , 2
   .insn r 0x33 , 2 , 2 , a4 , a5 , a3
-	# END
+  #
 	lw	a5,-20(s0)
-	# ROTRIGHT(x,13) 
+  # rotright(x,13) saved to a5 , a5 = x
 	# srli	a3,a5,13
 	# slli	a5,a5,19
 	# or	a5,a5,a3
-	addi a3 , x0 , 13
+  addi a3 , a0 , 13
   .insn r 0x33 , 2 , 2 , a5 , a5 , a3
-	# addi a3 , a0 , 13
-  # .insn r 0x33 , 2 , 2 , a5 , a5 , a3
-	# END
-	xor	a4,a4,a5
+	
+  xor	a4,a4,a5
 	lw	a5,-20(s0)
-	# ROTRIGHT(x,22)
+  # rotright(x,22)
 	# slli	a3,a5,10
 	# srli	a5,a5,22
 	# or	a5,a5,a3
-	addi a3 , x0 , 22
+  addi a3 , a0 , 22
   .insn r 0x33 , 2 , 2 , a5 , a5 , a3
-	# END
-	# MAJ!
 	xor	a4,a4,a5
 	lw	a3,-24(s0)
 	lw	a5,-28(s0)
@@ -737,9 +714,20 @@ sha256_final:
 	sw	zero,-52(s0)
 	j	.L20
 .L21:
-	# begin 0x000000ff , reverse
-	# hash[i]      = (ctx->state[0] >> (24 - i * 8)) & 0x000000ff;
-	lw	a5,-68(s0)
+  # # hash[i]      = (ctx->state[0] >> (24 - i * 8)) & 0x000000ff;
+	# lw	a5,-68(s0)
+	# lw	a4,80(a5)
+	# li	a3,3
+	# lw	a5,-52(s0)
+	# sub	a5,a3,a5
+	# slli	a5,a5,3
+	# srl	a3,a4,a5
+	# lw	a4,-72(s0)
+	# lw	a5,-52(s0)
+	# add	a5,a4,a5
+	# andi	a4,a3,0xff
+	# sb	a4,0(a5)
+  lw	a5,-68(s0)
   lw	a4,80(a5) # a4 = ctx->state[0]
   lw	a5,-52(s0) # a5 = i 
   .insn r 0x33 , 3 , 2 , a3 , a4 , a5
@@ -747,8 +735,22 @@ sha256_final:
 	lw	a5,-52(s0)
 	add	a5,a4,a5
   sb	a3,0(a5)
-	# hash[i + 4]  = (ctx->state[1] >> (24 - i * 8)) & 0x000000ff;
-	lw	a5,-68(s0)
+  # END
+  # hash[i + 4]  = (ctx->state[1] >> (24 - i * 8)) & 0x000000ff;
+	# lw	a5,-68(s0)
+	# lw	a4,84(a5)
+	# li	a3,3
+	# lw	a5,-52(s0)
+	# sub	a5,a3,a5
+	# slli	a5,a5,3
+	# srl	a3,a4,a5
+	# lw	a5,-52(s0)
+	# addi	a5,a5,4
+	# lw	a4,-72(s0)
+	# add	a5,a4,a5
+	# andi	a4,a3,0xff
+	# sb	a4,0(a5)
+  lw	a5,-68(s0)
   lw	a4,84(a5) # a4 = ctx->state[1]
   lw	a5,-52(s0) # a5 = i 
   .insn r 0x33 , 3 , 2 , a3 , a4 , a5
@@ -757,8 +759,9 @@ sha256_final:
   lw	a4,-72(s0)
 	add	a5,a4,a5
   sb	a3,0(a5)
+  # END
 
-	# END 
+  # hash[i + 8]  = (ctx->state[2] >> (24 - i * 8)) & 0x000000ff;
 	lw	a5,-68(s0)
 	lw	a4,88(a5)
 	lw	a5,-52(s0)

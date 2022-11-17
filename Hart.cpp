@@ -1015,7 +1015,7 @@ void
 Hart<URV>::execRotleft(const DecodedInst* di)
 {
   /* INSERT YOUR CODE  HERE */
-  URV v = ((int)(intRegs_.read(di->op1())) << (int)(intRegs_.read(di->op2()))) | ((int)(intRegs_.read(di->op1())) >> (int)(32 - intRegs_.read(di->op2())));
+  URV v = ((int)(intRegs_.read(di->op1())) << (intRegs_.read(di->op2()))) | ((intRegs_.read(di->op1())) >> (32 - intRegs_.read(di->op2())));
   intRegs_.write(di->op0(), v);
 }
 
@@ -1024,8 +1024,8 @@ inline
 void
 Hart<URV>::execRotright(const DecodedInst* di)
 {
-  /* INSERT YOUR CODE  HERE */ 
-  URV v = ((int)(intRegs_.read(di->op1())) >> (int)(intRegs_.read(di->op2()))) | ((int)(intRegs_.read(di->op1())) << (int)(32 - intRegs_.read(di->op2())));
+  /* INSERT YOUR CODE  HERE */
+  URV v = ((intRegs_.read(di->op1())) >> (intRegs_.read(di->op2()))) | ((int)(intRegs_.read(di->op1())) << (32 - intRegs_.read(di->op2())));
   intRegs_.write(di->op0(), v);
 }
 
