@@ -97,6 +97,68 @@ RFormInst::encodeNotand(unsigned rdv, unsigned rs1v, unsigned rs2v)
   return true;
 }
 
+bool
+RFormInst::encodeSig0(unsigned rdv, unsigned rs1v, unsigned rs2v)
+{
+  /* INSERT YOUR CODE FROM HERE */
+  if (rdv > 31 or rs1v > 31 or rs2v > 31)
+    return false;
+  assert(0);
+  bits.opcode = 0x33;
+  bits.rd = rdv & 0x1f;
+  bits.funct3 = 5;
+  bits.rs1 = rs1v & 0x1f;
+  bits.rs2 = rs2v & 0x1f;
+  bits.funct7 = 2;
+  return true;
+}
+
+bool
+RFormInst::encodeSig1(unsigned rdv, unsigned rs1v, unsigned rs2v)
+{
+  /* INSERT YOUR CODE FROM HERE */
+  if (rdv > 31 or rs1v > 31 or rs2v > 31)
+    return false;
+  assert(0);
+  bits.opcode = 0x33;
+  bits.rd = rdv & 0x1f;
+  bits.funct3 = 6;
+  bits.rs1 = rs1v & 0x1f;
+  bits.rs2 = rs2v & 0x1f;
+  bits.funct7 = 2;
+  return true;
+}
+
+bool
+RFormInst::encodeEp0(unsigned rdv, unsigned rs1v, unsigned rs2v)
+{
+  /* INSERT YOUR CODE FROM HERE */
+  if (rdv > 31 or rs1v > 31 or rs2v > 31)
+    return false;
+  bits.opcode = 0x33;
+  bits.rd = rdv & 0x1f;
+  bits.funct3 = 7;
+  bits.rs1 = rs1v & 0x1f;
+  bits.rs2 = rs2v & 0x1f;
+  bits.funct7 = 2;
+  return true;
+}
+
+bool
+RFormInst::encodeEp1(unsigned rdv, unsigned rs1v, unsigned rs2v)
+{
+  /* INSERT YOUR CODE FROM HERE */
+  if (rdv > 31 or rs1v > 31 or rs2v > 31)
+    return false;
+  bits.opcode = 0x33;
+  bits.rd = rdv & 0x1f;
+  bits.funct3 = 0;
+  bits.rs1 = rs1v & 0x1f;
+  bits.rs2 = rs2v & 0x1f;
+  bits.funct7 = 3;
+  return true;
+}
+
 /* YOUR CODE END HERE */
 
 bool

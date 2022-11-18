@@ -98,6 +98,11 @@ namespace WdRiscv
     /// Encode "Notand rd, rs1, rs2" into this object.
     bool encodeNotand(unsigned rd, unsigned rs1, unsigned rs2);
 
+    bool encodeSig0(unsigned rd, unsigned rs1, unsigned rs2);
+    bool encodeSig1(unsigned rd, unsigned rs1, unsigned rs2);
+    bool encodeEp0(unsigned rd, unsigned rs1, unsigned rs2);
+    bool encodeEp1(unsigned rd, unsigned rs1, unsigned rs2);
+
 /* INSERT YOUR CODE END HERE */
 
     /// Encode "addw rd, rs1, rs2" into this object.

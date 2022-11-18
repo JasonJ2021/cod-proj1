@@ -1850,6 +1850,10 @@ namespace WdRiscv
     void execRotright(const DecodedInst*);
     void execReverse(const DecodedInst*);
     void execNotand(const DecodedInst*);
+    void execSig0(const DecodedInst*);
+    void execSig1(const DecodedInst*);
+    void execEp0(const DecodedInst*);
+    void execEp1(const DecodedInst*);
 /* INSERT YOUR CODE END HERE */  
 
     void execFence(const DecodedInst*);

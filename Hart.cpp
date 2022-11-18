@@ -1015,7 +1015,9 @@ void
 Hart<URV>::execRotleft(const DecodedInst* di)
 {
   /* INSERT YOUR CODE  HERE */
-  URV v = ((int)(intRegs_.read(di->op1())) << (intRegs_.read(di->op2()))) | ((intRegs_.read(di->op1())) >> (32 - intRegs_.read(di->op2())));
+  URV rs1 = intRegs_.read(di->op1());
+  URV rs2 = intRegs_.read(di->op2());
+  URV v = ((int)rs1 << rs2) | ( rs1 >> (32 - rs2));
   intRegs_.write(di->op0(), v);
 }
 
@@ -1025,7 +1027,9 @@ void
 Hart<URV>::execRotright(const DecodedInst* di)
 {
   /* INSERT YOUR CODE  HERE */
-  URV v = ((intRegs_.read(di->op1())) >> (intRegs_.read(di->op2()))) | ((int)(intRegs_.read(di->op1())) << (32 - intRegs_.read(di->op2())));
+  URV rs1 = intRegs_.read(di->op1());
+  URV rs2 = intRegs_.read(di->op2());
+  URV v = (rs1 >> rs2) | ((int)rs1 << (32 - rs2));
   intRegs_.write(di->op0(), v);
 }
 
@@ -1045,6 +1049,60 @@ Hart<URV>::execNotand(const DecodedInst* di)
 {
   /* INSERT YOUR CODE  HERE */ 
   URV v = (~intRegs_.read(di->op1())) & (intRegs_.read(di->op2()));
+  intRegs_.write(di->op0(), v);
+}
+template <typename URV>
+inline
+void
+Hart<URV>::execSig0(const DecodedInst* di)
+{
+  /* INSERT YOUR CODE  HERE */ 
+  // #define SIG0(x) (ROTRIGHT(x,7) ^ ROTRIGHT(x,18) ^ ((x) >> 3))
+  URV rs1 = intRegs_.read(di->op1());
+  URV t_1 = (rs1 >> 7) | ((int)rs1 << (32 - 7));
+  URV t_2 = (rs1 >> 18) | ((int)rs1 << (32 - 18));
+  URV v = t_1 ^ t_2 ^ ((rs1) >> 3);
+  intRegs_.write(di->op0(), v);
+}
+template <typename URV>
+inline
+void
+Hart<URV>::execSig1(const DecodedInst* di)
+{
+  // #define SIG1(x) (ROTLEFT(x,13) ^ ROTLEFT(x,15) ^ ((x) >> 10))
+  /* INSERT YOUR CODE  HERE */ 
+  URV rs1 = intRegs_.read(di->op1());
+  URV t_1 = ((int)rs1 << 13) | (rs1 >> (32 - 13));
+  URV t_2 = ((int)rs1 << 15) | (rs1 >> (32 - 15));
+  URV v = t_1 ^ t_2 ^ ((rs1) >> 10);
+  intRegs_.write(di->op0(), v);
+}
+template <typename URV>
+inline
+void
+Hart<URV>::execEp0(const DecodedInst* di)
+{
+  /* INSERT YOUR CODE  HERE */ 
+  // #define EP0(x) (ROTRIGHT(x,2) ^ ROTRIGHT(x,13) ^ ROTRIGHT(x,22))
+  URV rs1 = intRegs_.read(di->op1());
+  URV t_1 = (rs1 >> 2) | ((int)rs1 << (32 - 2));
+  URV t_2 = (rs1 >> 13) | ((int)rs1 << (32 - 13));
+  URV t_3 = (rs1 >> 22) | ((int)rs1 << (32 - 22));
+  URV v = t_1 ^ t_2 ^ t_3;
+  intRegs_.write(di->op0(), v);
+}
+template <typename URV>
+inline
+void
+Hart<URV>::execEp1(const DecodedInst* di)
+{
+  /* INSERT YOUR CODE  HERE */ 
+  // #define EP1(x) (ROTLEFT(x,7) ^ ROTLEFT(x,21) ^ ROTLEFT(x,26))
+  URV rs1 = intRegs_.read(di->op1());
+  URV t_1 = ((int)rs1 << 7) | (rs1 >> (32 - 7));
+  URV t_2 = ((int)rs1 << 21) | (rs1 >> (32 - 21));
+  URV t_3 = ((int)rs1 << 26) | (rs1 >> (32 - 26));
+  URV v = t_1 ^ t_2 ^ t_3;
   intRegs_.write(di->op0(), v);
 }
 
@@ -6017,6 +6075,10 @@ Hart<URV>::execute(const DecodedInst* di)
      &&rotright,
      &&reverse,
      &&notand , 
+     &&sig0 ,
+     &&sig1 ,
+     &&ep0 ,
+     &&ep1 ,    
     };
 
   const InstEntry* entry = di->instEntry();
@@ -6193,6 +6255,19 @@ Hart<URV>::execute(const DecodedInst* di)
  notand:
   execNotand(di);
   return;
+ sig0:
+  execSig0(di);
+  return;
+ sig1:
+  execSig1(di);
+  return;
+ ep0:
+  execEp0(di);
+  return;
+ ep1:
+  execEp1(di);
+  return;
+
 /* INSERT YOUR CODE END HERE */  
 
  fence:

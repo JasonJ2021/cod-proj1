@@ -139,38 +139,36 @@ sha256_transform:
 	lw	a5,-304(a5)
 	# ROTLEFT(x,13) √
 	# ROTLEFT(a,b) (((a) << (b)) | ((a) >> (32-(b))))
-	addi a3 , x0 , 13
-	.insn r 0x33 , 1 , 2 , a4 , a5 , a3
-	# slli	a3,a5,13
-	# srli	a4,a5,19
-	# or	a4,a4,a3
-  #
-	lw	a5,-52(s0)
-	addi	a5,a5,-2
-	slli	a5,a5,2
-	addi	a3,s0,-16
-	add	a5,a3,a5
-	lw	a5,-304(a5)
-	# ROTLEFT(x,15) √
-	# slli	a3,a5,15
-	# srli	a5,a5,17
-	# or	a5,a5,a3
-	addi a3 , x0 , 15
-  .insn r 0x33 , 1 , 2 , a5 , a5 , a3
-	# xor(ROTLEFT(x,15) , ROTLEFT(X,13))
-	xor	a4,a4,a5
-	# 
-	lw	a5,-52(s0)
-	addi	a5,a5,-2
-	slli	a5,a5,2
-	addi	a3,s0,-16
-	add	a5,a3,a5
-	lw	a5,-304(a5)
-	# a5 = x >> 10
-	srli	a5,a5,10
+	# a5 = m[i-2]
+	# BEGIN SIG1(m[i-2])
+	# addi a3 , x0 , 13
+	# .insn r 0x33 , 1 , 2 , a4 , a5 , a3
+	# lw	a5,-52(s0)
+	# addi	a5,a5,-2
+	# slli	a5,a5,2
+	# addi	a3,s0,-16
+	# add	a5,a3,a5
+	# lw	a5,-304(a5)
+	# # ROTLEFT(x,15) √
+	# addi a3 , x0 , 15
+  # .insn r 0x33 , 1 , 2 , a5 , a5 , a3
+	# # xor(ROTLEFT(x,15) , ROTLEFT(X,13))
+	# xor	a4,a4,a5
+	# # 
+	# lw	a5,-52(s0)
+	# addi	a5,a5,-2
+	# slli	a5,a5,2
+	# addi	a3,s0,-16
+	# add	a5,a3,a5
+	# lw	a5,-304(a5)
+	# # a5 = x >> 10
+	# srli	a5,a5,10
 	
-	xor	a4,a4,a5
-	# end of sig1(x)
+	# xor	a4,a4,a5
+	
+	# a5 = m[i-2] , save to a4
+	.insn r 0x33 , 6 , 2 , a4 , a5 , x0
+	# END of sig1(x)
 
 	lw	a5,-52(s0)
 	addi	a5,a5,-7
@@ -186,36 +184,38 @@ sha256_transform:
 	add	a5,a4,a5
 	lw	a5,-304(a5)
 	# ROTRIGHT(x,7) √
-	# srli	a2,a5,7
-	# slli	a4,a5,25
-	# or	a4,a4,a2
+	# BEGIN OF SIG0(m[i-15])
 	addi a2 , x0 , 7
   .insn r 0x33 , 2 , 2 , a4 , a5 , a2
 	# endof rotright(x,7)
-	lw	a5,-52(s0)
-	addi	a5,a5,-15
-	slli	a5,a5,2
-	addi	a2,s0,-16
-	add	a5,a2,a5
-	lw	a5,-304(a5)
-	# # ROTRIGHT(x,18)
-	# slli	a2,a5,14
-	# srli	a5,a5,18
-	# or	a5,a5,a2
-	addi a2 , x0 , 18
-  .insn r 0x33 , 2 , 2 , a5 , a5 , a2
-	xor	a4,a4,a5
-	#end of ========= rotright ^ rot^right
-	lw	a5,-52(s0)
-	addi	a5,a5,-15
-	slli	a5,a5,2
-	addi	a2,s0,-16
-	add	a5,a2,a5
-	lw	a5,-304(a5)
-	# x >> 3
-	srli	a5,a5,3
-	xor	a5,a4,a5
-	add	a4,a3,a5
+	# lw	a5,-52(s0)
+	# addi	a5,a5,-15
+	# slli	a5,a5,2
+	# addi	a2,s0,-16
+	# add	a5,a2,a5
+	# lw	a5,-304(a5)
+	# # # ROTRIGHT(x,18)
+	# # slli	a2,a5,14
+	# # srli	a5,a5,18
+	# # or	a5,a5,a2
+	# addi a2 , x0 , 18
+  # .insn r 0x33 , 2 , 2 , a5 , a5 , a2
+	# xor	a4,a4,a5
+	# #end of ========= rotright ^ rot^right
+	# lw	a5,-52(s0)
+	# addi	a5,a5,-15
+	# slli	a5,a5,2
+	# addi	a2,s0,-16
+	# add	a5,a2,a5
+	# lw	a5,-304(a5)
+	# # x >> 3
+	# srli	a5,a5,3
+	# xor	a5,a4,a5
+	# add	a4,a3,a5
+
+	# a5 = m[i-15] , save to a4
+	.insn r 0x33 , 5 , 2 , a4 , a5 , x0
+	add a4 , a3 , a4
 	# end of sig1 & sig0
 	lw	a5,-52(s0)
 	addi	a5,a5,-16
@@ -267,30 +267,34 @@ sha256_transform:
 .L7:
 	lw	a5,-36(s0)
 	# ROTLEFT(x,7) √
-	# slli	a3,a5,7 
-	# srli	a4,a5,25
-	# or	a4,a4,a3
-	addi a3 , x0 , 7
-  .insn r 0x33 , 1 , 2 , a4 , a5 , a3
-	# endof ROTLEFT(x,7) 
-	lw	a5,-36(s0)
-	# ROTLEFT(x,21) √
-	# srli	a3,a5,11
-	# slli	a5,a5,21
-	# or	a5,a5,a3
-	addi a3 , x0 , 21
-  .insn r 0x33 , 1 , 2 , a5 , a5 , a3
-	# END OF ROTLEFT(X,21)
-	xor	a4,a4,a5
-	lw	a5,-36(s0)
-	# ROTLEFT(x,26) √
-	# srli	a3,a5,6
-	# slli	a5,a5,26
-	# or	a5,a5,a3
-	# END OF ROTLEFT(x,26)
-	addi a3 , x0 , 26
-  .insn r 0x33 , 1 , 2 , a5 , a5 , a3
-	xor	a4,a4,a5
+	# BEGIN OF EP1
+
+	# VERSION 1
+	# addi a3 , x0 , 7
+  # .insn r 0x33 , 1 , 2 , a4 , a5 , a3
+	# # endof ROTLEFT(x,7) 
+	# lw	a5,-36(s0)
+	# # ROTLEFT(x,21) √
+	# # srli	a3,a5,11
+	# # slli	a5,a5,21
+	# # or	a5,a5,a3
+	# addi a3 , x0 , 21
+  # .insn r 0x33 , 1 , 2 , a5 , a5 , a3
+	# # END OF ROTLEFT(X,21)
+	# xor	a4,a4,a5
+	# lw	a5,-36(s0)
+	# # ROTLEFT(x,26) √
+	# # srli	a3,a5,6
+	# # slli	a5,a5,26
+	# # or	a5,a5,a3
+	# # END OF ROTLEFT(x,26)
+	# addi a3 , x0 , 26
+  # .insn r 0x33 , 1 , 2 , a5 , a5 , a3
+	# xor	a4,a4,a5
+	
+	# VERSION 2 
+	# a5 = e , saved to a4
+	.insn r 0x33 , 0 , 3 , a4 , a5 , x0
 	# END OF EP(1)
 	lw	a5,-48(s0)
 	add	a4,a4,a5
@@ -323,34 +327,34 @@ sha256_transform:
 	add	a5,a4,a5
 	sw	a5,-60(s0)
 	lw	a5,-20(s0)
+	# Version 1 
 	# ROTRIGHT(x,2) √
-	# srli	a3,a5,2
-	# slli	a4,a5,30
-	# or	a4,a4,a3
-	addi a3 , x0 , 2
-  .insn r 0x33 , 2 , 2 , a4 , a5 , a3
-	# END
-	lw	a5,-20(s0)
-	# ROTRIGHT(x,13) 
-	# srli	a3,a5,13
-	# slli	a5,a5,19
-	# or	a5,a5,a3
-	addi a3 , x0 , 13
-  .insn r 0x33 , 2 , 2 , a5 , a5 , a3
-	# addi a3 , a0 , 13
+	# addi a3 , x0 , 2
+  # .insn r 0x33 , 2 , 2 , a4 , a5 , a3
+	# # END
+	# lw	a5,-20(s0)
+	# # ROTRIGHT(x,13) 
+	# # srli	a3,a5,13
+	# # slli	a5,a5,19
+	# # or	a5,a5,a3
+	# addi a3 , x0 , 13
   # .insn r 0x33 , 2 , 2 , a5 , a5 , a3
-	# END
-	xor	a4,a4,a5
-	lw	a5,-20(s0)
-	# ROTRIGHT(x,22)
-	# slli	a3,a5,10
-	# srli	a5,a5,22
-	# or	a5,a5,a3
-	addi a3 , x0 , 22
-  .insn r 0x33 , 2 , 2 , a5 , a5 , a3
+	# # addi a3 , a0 , 13
+  # # .insn r 0x33 , 2 , 2 , a5 , a5 , a3
+	# # END
+	# xor	a4,a4,a5
+	# lw	a5,-20(s0)
+	# # ROTRIGHT(x,22)
+	# # slli	a3,a5,10
+	# # srli	a5,a5,22
+	# # or	a5,a5,a3
+	# addi a3 , x0 , 22
+  # .insn r 0x33 , 2 , 2 , a5 , a5 , a3
+	# a5 = a , saved to a4
+	.insn r 0x33 , 7 , 2 , a4 , a5 , x0 
 	# END
 	# MAJ!
-	xor	a4,a4,a5
+	# xor	a4,a4,a5
 	lw	a3,-24(s0)
 	lw	a5,-28(s0)
 	xor	a3,a3,a5
